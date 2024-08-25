@@ -4,10 +4,8 @@ module Repeater where
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BSC
 import qualified Crypto.Hash.SHA256 as SHA256
-import Data.Bits (shiftL, (.|.))
+import Data.Bits (shiftL, (.|.), (.&.))
 import Data.Word (Word8)
-import Data.ByteString.Builder (word64BE, toLazyByteString)
-import Data.ByteString.Lazy (toStrict)
 
 getRepeated :: String -> Int -> BS.ByteString
 getRepeated s minBytes = 
@@ -19,7 +17,7 @@ getRepeated s minBytes =
 getHashed :: BS.ByteString -> Int -> BS.ByteString
 getHashed s minBytes =
     let minHashTimes = minBytes `div` 32
-        mustEndWith = toStrict $ toLazyByteString $ word64BE $ fromIntegral minBytes
+        mustEndWith = BS.singleton $ fromIntegral $ (.&. 0xFF) minBytes
         initialHash = SHA256.hash s
         firstSerialHashes = BS.concat $ replicate minHashTimes initialHash
         

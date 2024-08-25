@@ -1,10 +1,14 @@
 module Generator where
 
-import ArgParser hiding (alphabetTypes, length)
+import ArgParser hiding (passwordLength, alphabetTypes)
 import Data.List (intercalate)
 import Alphabet
 import Repeater
-import Prelude hiding (length)
+    ( getRepeated,
+      getHashed,
+      convertLargeByteStringToBase,
+      getChecksumAndAppend )
+
 
 bip39_min_bytes :: Int
 bip39_min_bytes = 32        -- 256 bits of hash, additional 8 bit as a checksum, 33 bytes total
@@ -22,11 +26,12 @@ generatorBip39 _ _ password = do
 
 
 generatorNormal :: [AlphabetType] -> Maybe Int -> String -> String
-generatorNormal alphabetTypes (Just length) password = do
-    let repeated = getRepeated password length
-        hashed = getHashed repeated length
-        base = convertLargeByteStringToBase length hashed
+generatorNormal alphabetTypes (Just passwordLength) password = do
+    let repeated = getRepeated password passwordLength
+        hashed = getHashed repeated passwordLength
+        allChars :: [String]
         allChars = alphabet alphabetTypes
+        base = convertLargeByteStringToBase (length allChars) hashed
         chars = map (allChars !!) base
     concat chars
 
@@ -34,7 +39,7 @@ generatorNormal _ Nothing _ = error "Length must be provided for normal alphabet
 
 
 generator :: Args -> String
-generator (Args alphabetTypes length password) = do
+generator (Args alphabetTypes passwordLength password) = do
     case alphabetTypes of
-        [Bip39] -> generatorBip39 [Bip39] length password
-        _       -> generatorNormal alphabetTypes length password
+        [Bip39] -> generatorBip39 [Bip39] passwordLength password
+        _       -> generatorNormal alphabetTypes passwordLength password

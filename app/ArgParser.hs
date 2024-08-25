@@ -7,7 +7,7 @@ import Data.List (nub)
 
 data Args = Args
   { alphabetTypes :: [AlphabetType],
-    length :: Maybe Int,
+    passwordLength :: Maybe Int,
     userPassword :: String
   }
   deriving (Show)
@@ -16,7 +16,7 @@ data Args = Args
 argsParser :: Parser Args
 argsParser = Args
   <$> alphabetTypeParser
-  <*> optional lengthParser
+  <*> optional passwordLengthParser
   <*> passwordParser
 
 alphabetTypeParser :: Parser [AlphabetType]
@@ -47,9 +47,9 @@ passwordParser = strArgument
   )
 
 
-lengthParser :: Parser Int
-lengthParser = option auto
-  (  long "length"
+passwordLengthParser :: Parser Int
+passwordLengthParser = option auto
+  (  long "passwordLength"
   <> short 'l'
-  <> metavar "LENGTH"
-  <> help "Length of the generated password (not applicable for BIP39)")
+  <> metavar "passwordLength"
+  <> help "passwordLength of the generated password (not applicable for BIP39)")
