@@ -2,6 +2,7 @@ module Alphabet where
 
 data AlphabetType = Lowercase | Uppercase | Numbers | Symbols | Bip39 deriving (Show, Eq)
 
+bip39List :: [String]
 bip39List =
   [ "abandon",
     "ability",
@@ -2055,11 +2056,11 @@ bip39List =
 
 
 alphabet :: [AlphabetType] -> [String]
-alphabet types = concatMap getAlphabet types
+alphabet = concatMap getAlphabet
     where
         getAlphabet :: AlphabetType -> [String]
         getAlphabet Lowercase = map (: []) ['a'..'z']
         getAlphabet Uppercase = map (: []) ['A'..'Z']
-        getAlphabet Numbers = map show [0..9]
+        getAlphabet Numbers = map show [0 :: Integer .. 9 :: Integer]
         getAlphabet Symbols = map (: []) "!@#$%^&*()_+-=[]{}|;:,.<>?"
         getAlphabet Bip39 = bip39List

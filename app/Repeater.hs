@@ -71,4 +71,4 @@ bip39Checksum bs =
 getChecksumAndAppend :: BS.ByteString -> BS.ByteString
 getChecksumAndAppend bs =
     let checksum = bip39Checksum bs
-    in BS.append bs checksum
+    in BS.append checksum bs

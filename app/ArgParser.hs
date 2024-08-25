@@ -13,26 +13,25 @@ data Args = Args
   deriving (Show)
 
 
-alphabetParser :: Parser ([AlphabetType], Maybe Int)
-alphabetParser = option (eitherReader parseAlphabetAndLength)
+argsParser :: Parser Args
+argsParser = Args
+  <$> alphabetTypeParser
+  <*> optional lengthParser
+  <*> passwordParser
+
+alphabetTypeParser :: Parser [AlphabetType]
+alphabetTypeParser = option (eitherReader parseAlphabetType)
   (  long "type"
   <> short 't'
-  <> metavar "TYPE[LENGTH]"
-  <> help "Alphabet type (l:lowercase, u:uppercase, n:numbers, s:symbols, bip39) optionally followed by length"
-  )
+  <> metavar "TYPE"
+  <> help "Alphabet type (l:lowercase, u:uppercase, n:numbers, s:symbols, bip39)")
 
+parseAlphabetType :: String -> Either String [AlphabetType]
+parseAlphabetType s = 
+  case map toLower s of
+    "bip39" -> Right [Bip39]
+    types   -> Right $ nub $ map charToAlphabetType types
 
-parseAlphabetAndLength :: String -> Either String ([AlphabetType], Maybe Int)
-parseAlphabetAndLength s =
-  case span (/= 'b') (map toLower s) of
-    (_, "bip39") -> Right ([Bip39], Nothing)
-    (types, rest) ->
-      let validTypes = nub $ map charToAlphabetType types
-      in if null validTypes
-         then Left "Invalid alphabet type"
-         else case reads rest of
-           [(n, "")] -> Right (validTypes, Just n)
-           _         -> Right (validTypes, Nothing)
 
 charToAlphabetType :: Char -> AlphabetType
 charToAlphabetType 'l' = Lowercase
@@ -48,7 +47,9 @@ passwordParser = strArgument
   )
 
 
-argsParser :: Parser Args
-argsParser = (Args . fst <$> alphabetParser)
-  <*> (snd <$> alphabetParser)
-  <*> passwordParser
+lengthParser :: Parser Int
+lengthParser = option auto
+  (  long "length"
+  <> short 'l'
+  <> metavar "LENGTH"
+  <> help "Length of the generated password (not applicable for BIP39)")
